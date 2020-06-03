@@ -1,24 +1,21 @@
 const bcrypt = require('bcryptjs')
 const Boom = require('@hapi/boom')
+const DynamoStore = require('./dynamoStore');
 
 const User = require('../models/user')
 
-const users = {}
+
 const saltRounds = 10
 
 async function create (username, passwordString) {
-  if (users[username]) {
-    throw Boom.conflict('Username already exists')
-  }
-
+  
   const passwordHash = hashPassword(passwordString)
   const user = new User(username, passwordHash)
-  users[username] = user
-  return user
+  //DynamoStore.putItem('users', user);
 }
 
 async function get (username) {
-  return users[username]
+  return DynamoStore.getItem('users', 'username', username);
 }
 
 async function authenticate (username, passwordString) {
